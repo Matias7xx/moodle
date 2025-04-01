@@ -1,0 +1,49 @@
+version: '3'
+services:
+  db:
+    image: postgres:14
+    container_name: moodle_db
+    environment:
+      POSTGRES_DB: moodle
+      POSTGRES_USER: moodle
+      POSTGRES_PASSWORD: moodle
+    volumes:
+      - moodle_db:/var/lib/postgresql/data
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: moodle_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    restart: always
+
+  moodle:
+    image: moodle-pcpb
+    container_name: moodle_app
+    ports:
+      - "8080:80"
+      - "443:443"
+    environment:
+      - MOODLE_DATABASE_TYPE=postgresql
+      - MOODLE_DATABASE_HOST=db
+      - MOODLE_DATABASE_PORT_NUMBER=5432
+      - MOODLE_DATABASE_USER=moodle
+      - MOODLE_DATABASE_PASSWORD=moodle
+      - MOODLE_DATABASE_NAME=moodle
+    volumes:
+      - moodle_data:/var/www/html
+      - moodledata_data:/var/www/moodledata  # O Moodle espera ter um diretório separado para dados
+    depends_on:
+      - db
+    restart: always
+
+volumes:
+  moodle_db:
+  moodle_data:
+  moodledata_data:
